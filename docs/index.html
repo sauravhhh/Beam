@@ -46,6 +46,9 @@ button.ghost{background:#eee;color:#111}
 .qr svg{width:100%;height:auto;display:block}
 .empty{font-size:14px;color:#999;text-align:center;padding:26px 0}
 .err{color:#b00;font-size:13px}
+.bigcode{font-family:ui-monospace,Menlo,monospace;font-size:44px;font-weight:800;letter-spacing:.18em;text-align:center;padding:12px 0 4px;color:#111}
+.codelabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#999;text-align:center;margin-top:6px}
+.codein{width:100%;border:2px solid #111;border-radius:12px;padding:14px;font-size:24px;font-family:ui-monospace,Menlo,monospace;font-weight:700;letter-spacing:.2em;text-align:center;outline:none;margin:6px 0;background:#fff;color:#111}
 .foot{font-size:12px;color:#aaa;text-align:center;margin-top:18px;line-height:1.6}
 .made{text-align:center;font-size:13px;color:#888;margin-top:10px}
 .made a{color:#0284c7;text-decoration:none;font-weight:700}</style>
@@ -58,22 +61,34 @@ button.ghost{background:#eee;color:#111}
 <main>
 <div class="card" id="status">Pick a file — you'll get a <b>link</b> anyone can download.</div>
 
+<div id="view-home">
 <div class="drop" id="btnPick">
   <div class="t">Share files</div>
   <div class="s">Tap to pick from this phone · up to 10 GB per file</div>
 </div>
 <input type="file" id="fileIn" multiple hidden>
+<button class="link" id="btnShowJoin">Have a code? Join here</button>
 <div id="xfers"><div class="empty" id="xferEmpty">Nothing shared yet.</div></div>
 
 <div class="card" style="margin-top:14px">
   <div class="steplabel">How it works</div>
   <ul class="steps">
     <li><span class="n">1</span><span>Pick one or more files from your phone.</span></li>
-    <li><span class="n">2</span><span>Each file gets its own download link and QR code.</span></li>
-    <li><span class="n">3</span><span>Share the link anywhere — the other person just opens it and downloads. No app needed on their side.</span></li>
+    <li><span class="n">2</span><span>Each file gets a 5-digit code, a link and a QR code.</span></li>
+    <li><span class="n">3</span><span>Share the code — they open Beam, tap Join, type it in, and download. No account needed.</span></li>
   </ul>
 </div>
 
+</div>
+<section id="view-join" hidden>
+  <div class="card">
+    <div class="steplabel">Enter the 5-digit code</div>
+    <input class="codein" id="codeIn" maxlength="5" inputmode="numeric" placeholder="·····" autocomplete="off">
+    <p class="err" id="joinErr" hidden></p>
+    <button id="btnJoinGo">Download</button>
+  </div>
+  <button class="link" id="btnJoinBack">Back</button>
+</section>
 <div class="foot">Files are stored on a free file host.<br>Links expire after 10 days without a download.</div>
 <div class="made">Made with ❤️ by <a href="https://github.com/sauravhhh">sauravhhh</a></div>
 </main>
@@ -171,6 +186,24 @@ function nextUpload(){
   });
 }
 
+function mintCode(longUrl, tries, cb){
+  if(tries <= 0){ cb(null, null); return; }
+  var code = String(Math.floor(10000 + Math.random() * 90000));
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://is.gd/create.php?format=json&shorturl=' + code + '&url=' + encodeURIComponent(longUrl));
+  xhr.onload = function(){
+    var ok = false, shorturl = null;
+    try{
+      var r = JSON.parse(xhr.responseText);
+      if(r.shorturl){ ok = true; shorturl = r.shorturl; }
+    }catch(e){}
+    if(ok) cb(code, shorturl);
+    else setTimeout(function(){ mintCode(longUrl, tries - 1, cb); }, 400);
+  };
+  xhr.onerror = function(){ setTimeout(function(){ mintCode(longUrl, tries - 1, cb); }, 400); };
+  xhr.send();
+}
+
 function doUpload(item, server){
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://' + server + '.gofile.io/uploadFile');
@@ -185,24 +218,35 @@ function doUpload(item, server){
       var r = JSON.parse(xhr.responseText);
       var link = r.data.downloadPage;
       setBar(item, 1);
-      item.stat.innerHTML = '';
-      var a = document.createElement('a');
-      a.href = link; a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = link;
-      var qr = document.createElement('div');
-      qr.className = 'qr';
-      var cp = document.createElement('button');
-      cp.className = 'small'; cp.textContent = 'Copy link';
-      cp.onclick = function(){
-        function done(){ cp.textContent = 'Copied'; setTimeout(function(){ cp.textContent = 'Copy link'; }, 1200); }
-        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, done);
-        else done();
-      };
-      item.stat.appendChild(a);
-      item.body.appendChild(qr);
-      item.body.appendChild(cp);
-      showQR(qr, link);
-      setStatus('Link ready — share it anywhere.');
+      item.stat.textContent = 'Making your 5-digit code…';
+      mintCode(link, 8, function(code, shorturl){
+        var use = shorturl || link;
+        setBar(item, 1);
+        item.stat.innerHTML = '';
+        var lbl = document.createElement('div');
+        lbl.className = 'codelabel'; lbl.textContent = 'Share this code';
+        var big = document.createElement('div');
+        big.className = 'bigcode'; big.textContent = code || '— —';
+        var a = document.createElement('a');
+        a.href = use; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = use;
+        var qr = document.createElement('div');
+        qr.className = 'qr';
+        var cp = document.createElement('button');
+        cp.className = 'small'; cp.textContent = 'Copy link';
+        cp.onclick = function(){
+          function done(){ cp.textContent = 'Copied'; setTimeout(function(){ cp.textContent = 'Copy link'; }, 1200); }
+          if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(use).then(done, done);
+          else done();
+        };
+        item.stat.appendChild(lbl);
+        item.stat.appendChild(big);
+        item.stat.appendChild(a);
+        item.body.appendChild(qr);
+        item.body.appendChild(cp);
+        showQR(qr, use);
+        setStatus(code ? 'Code ' + code + ' is live — share it anywhere.' : 'Link ready — share it anywhere.');
+      });
     }catch(e){
       item.stat.innerHTML = '<span class="err">Upload failed. Try again.</span>';
     }
@@ -234,6 +278,25 @@ $('fileIn').addEventListener('change', function(){
   setStatus('Uploading ' + files.length + (files.length === 1 ? ' file…' : ' files…'));
   nextUpload();
 });
+
+/* ---------- join ---------- */
+$('btnShowJoin').onclick = function(){
+  $('view-home').hidden = true;
+  $('view-join').hidden = false;
+  setStatus('Type the 5-digit code and tap Download.');
+  window.scrollTo(0, 0);
+};
+$('btnJoinBack').onclick = function(){
+  $('view-join').hidden = true;
+  $('view-home').hidden = false;
+  setStatus('Pick a file — you\u2019ll get a <b>code</b> anyone can join with.');
+};
+$('btnJoinGo').onclick = function(){
+  var code = $('codeIn').value.replace(/\D/g, '');
+  if(code.length !== 5){ $('joinErr').textContent = 'Codes are 5 digits.'; $('joinErr').hidden = false; return; }
+  $('joinErr').hidden = true;
+  location.href = 'https://is.gd/' + code;
+};
 
 /* ---------- PWA ---------- */
 if('serviceWorker' in navigator){
