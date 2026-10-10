@@ -6,48 +6,48 @@
 <title>Beam — share files with a link</title>
 <meta name="description" content="Beam: pick a file, get a link, anyone downloads it. Free, no accounts.">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#0d0d0d">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#fafafa;color:#111;max-width:560px;margin:0 auto;padding:0 0 48px;-webkit-tap-highlight-color:transparent}
-.topbar{display:flex;align-items:center;gap:12px;background:#111;color:#fff;padding:16px 20px;position:sticky;top:0;z-index:10}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#0d0d0d;color:#f5f5f5;max-width:560px;margin:0 auto;padding:0 0 48px;-webkit-tap-highlight-color:transparent}
+.topbar{display:flex;align-items:center;gap:12px;background:#000;color:#fff;padding:16px 20px;position:sticky;top:0;z-index:10;border-bottom:1px solid #1f1f1f}
 .topbar img{width:34px;height:34px;border-radius:9px;background:#fff}
 .topbar .name{font-size:20px;font-weight:800;letter-spacing:-.02em}
-.topbar .tag{font-size:11px;color:#bbb;margin-top:1px}
+.topbar .tag{font-size:11px;color:#888;margin-top:1px;letter-spacing:.12em}
 main{padding:16px}
-.card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-#status{font-size:14px;line-height:1.5;color:#333}
-#status b{color:#111}
-button{display:block;width:100%;border:none;border-radius:12px;background:#111;color:#fff;font-size:16px;font-weight:700;padding:15px;margin:8px 0;cursor:pointer}
+.card{background:#161616;border:1px solid #262626;border-radius:16px;padding:18px;margin-bottom:14px}
+#status{font-size:14px;line-height:1.5;color:#ccc}
+#status b{color:#fff}
+button{display:block;width:100%;border:none;border-radius:12px;background:#fff;color:#000;font-size:16px;font-weight:700;padding:15px;margin:8px 0;cursor:pointer}
 button:active{transform:scale(.98)}
 button.small{width:auto;display:inline-block;padding:10px 18px;font-size:14px;margin:8px 8px 0 0}
-button.ghost{background:#eee;color:#111}
+button.ghost{background:#2a2a2a;color:#fff}
 .steps{list-style:none;margin-top:4px}
-.steps li{display:flex;gap:12px;padding:10px 0;border-top:1px solid #f1f1f1;font-size:14px;line-height:1.5;color:#444}
+.steps li{display:flex;gap:12px;padding:10px 0;border-top:1px solid #242424;font-size:14px;line-height:1.5;color:#bbb}
 .steps li:first-child{border-top:none}
-.steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:#111;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.steplabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#999;margin:14px 0 6px}
-.drop{border:2px dashed #d5d5d5;border-radius:16px;background:#fff;padding:28px 16px;text-align:center;margin-bottom:14px;cursor:pointer}
-.drop:active{border-color:#111}
-.drop .t{font-size:16px;font-weight:700}
+.steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;color:#000;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steplabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#777;margin:14px 0 6px}
+.drop{border:2px dashed #3a3a3a;border-radius:16px;background:#141414;padding:32px 16px;text-align:center;margin-bottom:14px;cursor:pointer}
+.drop:active{border-color:#fff}
+.drop .t{font-size:17px;font-weight:800;letter-spacing:-.01em}
 .drop .s{font-size:13px;color:#888;margin-top:4px}
-.xfer{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.glyph{flex:none;width:46px;height:46px;border-radius:11px;background:#111;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+.xfer{background:#161616;border:1px solid #262626;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px}
+.glyph{flex:none;width:46px;height:46px;border-radius:11px;background:#fff;color:#000;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
 .xbody{flex:1;min-width:0}
-.xname{font-size:14px;font-weight:700;word-break:break-all}
+.xname{font-size:14px;font-weight:700;word-break:break-all;color:#fff}
 .xsub{font-size:12px;color:#888;margin-top:2px}
-.bar{height:6px;background:#f0f0f0;border-radius:3px;margin:10px 0 6px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#111;border-radius:3px;transition:width .15s}
-.xstat{font-size:13px;color:#555;word-break:break-all}
-.xstat a{color:#111;font-weight:700}
-.qr{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:12px;max-width:200px;margin:10px auto 2px}
+.bar{height:6px;background:#2a2a2a;border-radius:3px;margin:10px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#fff;border-radius:3px;transition:width .15s}
+.xstat{font-size:13px;color:#bbb;word-break:break-all}
+.xstat a{color:#fff;font-weight:700}
+.qr{background:#fff;border-radius:12px;padding:12px;max-width:200px;margin:10px auto 2px}
 .qr svg{width:100%;height:auto;display:block}
-.empty{font-size:14px;color:#999;text-align:center;padding:26px 0}
-.err{color:#b00;font-size:13px}
-.foot{font-size:12px;color:#aaa;text-align:center;margin-top:18px;line-height:1.6}
+.empty{font-size:14px;color:#666;text-align:center;padding:26px 0}
+.err{color:#ff7b7b;font-size:13px}
+.foot{font-size:12px;color:#666;text-align:center;margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
