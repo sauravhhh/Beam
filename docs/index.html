@@ -4,73 +4,107 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Beam — offline file share</title>
-<meta name="description" content="Beam: send files phone-to-phone over your WiFi or hotspot. No internet, no accounts.">
+<meta name="description" content="Beam: send files phone-to-phone over WiFi or a hotspot. No internet, no accounts.">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111111">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23111'/%3E%3Cg stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'%3E%3Cpath d='M50 72 V30'/%3E%3Cpath d='M32 48 L50 30 L68 48'/%3E%3Cpath d='M28 82 H72'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#fff;color:#111;max-width:560px;margin:0 auto;padding:20px 16px 40px;-webkit-tap-highlight-color:transparent}
-header{padding:8px 0 4px}
-.logo{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.sub{font-size:13px;color:#777;margin-top:2px}
-#status{font-size:14px;color:#111;background:#f4f4f4;border-radius:10px;padding:12px 14px;margin:14px 0;min-height:20px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#fafafa;color:#111;max-width:560px;margin:0 auto;padding:0 0 48px;-webkit-tap-highlight-color:transparent}
+.topbar{display:flex;align-items:center;gap:12px;background:#111;color:#fff;padding:16px 20px;position:sticky;top:0;z-index:10}
+.topbar img{width:34px;height:34px;border-radius:9px;background:#fff}
+.topbar .name{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.topbar .tag{font-size:11px;color:#bbb;margin-top:1px}
+main{padding:16px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+#status{font-size:14px;line-height:1.5;color:#333}
+#status b{color:#111}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 button{display:block;width:100%;border:none;border-radius:12px;background:#111;color:#fff;font-size:16px;font-weight:700;padding:15px;margin:8px 0;cursor:pointer}
 button:active{transform:scale(.98)}
 button.link{background:none;color:#777;font-size:14px;font-weight:400;padding:10px}
-button.small{width:auto;display:inline-block;padding:10px 18px;font-size:14px;margin:6px 6px 0 0}
+button.small{width:auto;display:inline-block;padding:10px 18px;font-size:14px;margin:8px 8px 0 0}
 button.ghost{background:#eee;color:#111}
-.hint{font-size:13px;color:#777;line-height:1.6;margin:12px 0}
-.step{font-size:14px;font-weight:700;margin:16px 0 8px}
-.qr{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:12px;max-width:300px;margin:8px auto}
+button:disabled{opacity:.45}
+.steps{list-style:none;margin-top:4px}
+.steps li{display:flex;gap:12px;padding:10px 0;border-top:1px solid #f1f1f1;font-size:14px;line-height:1.5;color:#444}
+.steps li:first-child{border-top:none}
+.steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:#111;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steplabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#999;margin:14px 0 6px}
+.qr{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:12px;max-width:280px;margin:8px auto}
 .qr svg{width:100%;height:auto;display:block}
-textarea{width:100%;border:1px solid #e0e0e0;border-radius:10px;padding:10px;font-size:12px;font-family:monospace;color:#555;background:#fafafa;margin:6px 0;min-height:64px;resize:vertical}
-.xfer{border:1px solid #eee;border-radius:12px;padding:12px;margin:8px 0}
+textarea{width:100%;border:1px solid #e0e0e0;border-radius:10px;padding:10px;font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#555;background:#fafafa;margin:6px 0;min-height:60px;resize:vertical}
+.drop{border:2px dashed #d5d5d5;border-radius:16px;background:#fff;padding:28px 16px;text-align:center;margin-bottom:14px;cursor:pointer}
+.drop:active{border-color:#111}
+.drop .t{font-size:16px;font-weight:700}
+.drop .s{font-size:13px;color:#888;margin-top:4px}
+.xfer{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.glyph{flex:none;width:46px;height:46px;border-radius:11px;background:#111;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+.xbody{flex:1;min-width:0}
 .xname{font-size:14px;font-weight:700;word-break:break-all}
 .xsub{font-size:12px;color:#888;margin-top:2px}
-.bar{height:8px;background:#f0f0f0;border-radius:4px;margin:10px 0 6px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#111;border-radius:4px;transition:width .15s}
+.bar{height:6px;background:#f0f0f0;border-radius:3px;margin:10px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#111;border-radius:3px;transition:width .15s}
 .xstat{font-size:13px;color:#555}
-.xstat a.dl{display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:700;font-size:14px;border-radius:10px;padding:12px 24px;margin-top:4px}
+.xstat a.dl{display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:700;font-size:14px;border-radius:10px;padding:12px 26px;margin-top:6px}
+.empty{font-size:14px;color:#999;text-align:center;padding:26px 0}
 #scanner{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #cam{width:100%;max-width:560px;flex:1;object-fit:cover}
 #btnScanCancel{position:absolute;bottom:24px;width:calc(100% - 48px);max-width:480px;background:#fff;color:#111}
 .err{color:#b00;font-size:13px;text-align:center}
+.foot{font-size:12px;color:#aaa;text-align:center;margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">Beam</div>
-  <div class="sub">offline file share &middot; no internet needed</div>
-</header>
-<div id="status">Tap Host on one phone, Join on the other.</div>
+<div class="topbar">
+  <img src="icon.svg" alt="Beam icon">
+  <div><div class="name">Beam</div><div class="tag">OFFLINE FILE SHARE</div></div>
+</div>
+<main>
+<div class="card" id="status">Tap <b>Host</b> on one phone, <b>Join</b> on the other.</div>
 
 <section id="view-home">
-  <button id="btnHost">Host</button>
-  <button id="btnJoin">Join</button>
-  <p class="hint">Both phones must be on the same WiFi network or hotspot. No internet connection is needed &mdash; files go directly between the two phones, nothing is uploaded anywhere. Pairing happens by scanning a QR code.</p>
+  <div class="btnrow">
+    <button id="btnHost">Host</button>
+    <button id="btnJoin">Join</button>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="steplabel">How it works</div>
+    <ul class="steps">
+      <li><span class="n">1</span><span>Put both phones on the same WiFi — or turn on one phone's hotspot and join it from the other.</span></li>
+      <li><span class="n">2</span><span>Pair by scanning a QR code. No accounts, no servers.</span></li>
+      <li><span class="n">3</span><span>Send files — they travel directly between the phones. No internet needed at any point.</span></li>
+    </ul>
+  </div>
 </section>
 
 <section id="view-host" hidden>
-  <div class="step">1. Let the other phone scan this code</div>
-  <div id="offerQR" class="qr"></div>
-  <textarea id="offerCode" readonly placeholder="Generating invite…"></textarea>
-  <button id="btnCopyOffer">Copy code</button>
-  <div class="step">2. Then scan their answer</div>
-  <button id="btnScanAnswer">Scan answer QR</button>
-  <textarea id="answerIn" placeholder="…or paste their answer code here"></textarea>
-  <button id="btnAcceptAnswer">Connect</button>
+  <div class="card">
+    <div class="steplabel">Step 1 · Share your invite</div>
+    <div id="offerQR" class="qr"></div>
+    <textarea id="offerCode" readonly placeholder="Generating invite…"></textarea>
+    <button id="btnCopyOffer">Copy code</button>
+  </div>
+  <div class="card">
+    <div class="steplabel">Step 2 · Scan their answer</div>
+    <button id="btnScanAnswer">Scan answer QR</button>
+    <textarea id="answerIn" placeholder="…or paste their answer code here"></textarea>
+    <button id="btnAcceptAnswer">Connect</button>
+  </div>
   <button class="link" id="btnHostBack">Back</button>
 </section>
 
 <section id="view-join" hidden>
-  <div class="step">1. Scan the host&rsquo;s code</div>
-  <button id="btnScanOffer">Scan host QR</button>
-  <textarea id="offerIn" placeholder="…or paste the host's code here"></textarea>
-  <button id="btnMakeAnswer">Create my answer</button>
-  <div id="joinAnswerWrap" hidden>
-    <div class="step">2. Let the host scan this code</div>
+  <div class="card">
+    <div class="steplabel">Step 1 · Scan the host's invite</div>
+    <button id="btnScanOffer">Scan host QR</button>
+    <textarea id="offerIn" placeholder="…or paste the host's code here"></textarea>
+    <button id="btnMakeAnswer">Create my answer</button>
+  </div>
+  <div class="card" id="joinAnswerWrap" hidden>
+    <div class="steplabel">Step 2 · Let the host scan you</div>
     <div id="answerQR" class="qr"></div>
     <textarea id="answerCode" readonly></textarea>
     <button id="btnCopyAnswer">Copy code</button>
@@ -79,12 +113,17 @@ textarea{width:100%;border:1px solid #e0e0e0;border-radius:10px;padding:10px;fon
 </section>
 
 <section id="view-files" hidden>
-  <button id="btnPick">Send a file</button>
+  <div class="drop" id="btnPick">
+    <div class="t">Send files</div>
+    <div class="s">Tap to pick from this phone</div>
+  </div>
   <input type="file" id="fileIn" multiple hidden>
-  <div id="xfers"></div>
-  <p class="hint">The other phone must tap Accept before a file starts sending.</p>
+  <div id="xfers"><div class="empty" id="xferEmpty">No transfers yet.</div></div>
   <button class="link" id="btnLeave">Disconnect</button>
 </section>
+
+<div class="foot">Files move directly between the two phones over WiFi or hotspot.<br>Nothing is uploaded anywhere.</div>
+</main>
 
 <div id="scanner" hidden>
   <video id="cam" playsinline muted></video>
@@ -112,7 +151,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
-function setStatus(t){ $('status').textContent = t; }
+function setStatus(t){ $('status').innerHTML = t; }
 function show(id){
   ['view-home','view-host','view-join','view-files'].forEach(function(v){ $(v).hidden = (v !== id); });
 }
@@ -121,6 +160,10 @@ function fmtBytes(n){
   var u = ['KB','MB','GB'], i = -1, v = n;
   do{ v /= 1024; i++; }while(v >= 1024 && i < u.length - 1);
   return (v >= 100 ? Math.round(v) : v.toFixed(1)) + ' ' + u[i];
+}
+function extOf(name){
+  var m = /\.([a-z0-9]{1,4})$/i.exec(name || '');
+  return m ? m[1].toUpperCase() : 'FILE';
 }
 
 /* ---------- QR ---------- */
@@ -176,7 +219,7 @@ function wireChannel(ch){
 }
 function onConnected(){
   show('view-files');
-  setStatus('Connected. Pick a file to beam it across — nothing leaves the two phones.');
+  setStatus('Connected. Pick a file above — it beams straight to the other phone.');
 }
 
 /* host */
@@ -303,21 +346,29 @@ $('btnScanCancel').onclick = stopScan;
 /* ---------- file transfer ---------- */
 var CHUNK = 16384;
 var sendQueue = [];
-var sending = null;    // {id, file, offset, card, bar, stat}
-var receiving = null;  // {id, name, size, mime, got, parts, card, bar, stat}
+var sending = null;
+var receiving = null;
 
 function ctrl(o){ if(dc && dc.readyState === 'open') dc.send(JSON.stringify(o)); }
+function hideEmpty(){ var e = $('xferEmpty'); if(e) e.hidden = true; }
 
 function makeCard(name, sub){
+  hideEmpty();
   var card = document.createElement('div');
   card.className = 'xfer';
+  var glyph = document.createElement('div');
+  glyph.className = 'glyph'; glyph.textContent = extOf(name);
+  var body = document.createElement('div');
+  body.className = 'xbody';
   var n = document.createElement('div'); n.className = 'xname'; n.textContent = name;
   var s = document.createElement('div'); s.className = 'xsub'; s.textContent = sub;
   var bar = document.createElement('div'); bar.className = 'bar';
   var fill = document.createElement('i'); bar.appendChild(fill);
   var stat = document.createElement('div'); stat.className = 'xstat';
-  card.appendChild(n); card.appendChild(s); card.appendChild(bar); card.appendChild(stat);
-  $('xfers').insertBefore(card, $('xfers').firstChild);
+  body.appendChild(n); body.appendChild(s); body.appendChild(bar); body.appendChild(stat);
+  card.appendChild(glyph); card.appendChild(body);
+  var list = $('xfers');
+  list.insertBefore(card, list.firstChild);
   return { card: card, bar: fill, stat: stat };
 }
 function setBar(c, frac){
@@ -382,7 +433,6 @@ function onIncomingMeta(m){
   ok.className = 'small'; ok.textContent = 'Accept';
   var no = document.createElement('button');
   no.className = 'small ghost'; no.textContent = 'Decline';
-  c.stat.appendChild(document.createElement('br'));
   c.stat.appendChild(ok); c.stat.appendChild(no);
   ok.onclick = function(){
     receiving = { id: m.id, name: m.name, size: m.size, mime: m.mime,
@@ -457,18 +507,25 @@ function reset(){
   stopScan();
   if(sending){ try{ ctrl({ t: 'cancel', id: sending.id }); }catch(e){} }
   sending = null; receiving = null; sendQueue = [];
-  $('xfers').innerHTML = '';
+  $('xfers').innerHTML = '<div class="empty" id="xferEmpty">No transfers yet.</div>';
   if(dc){ try{ dc.close(); }catch(e){} dc = null; }
   if(pc){ try{ pc.close(); }catch(e){} pc = null; }
   ['offerCode','answerIn','offerIn','answerCode'].forEach(function(id){ $(id).value = ''; });
   $('offerQR').innerHTML = ''; $('answerQR').innerHTML = '';
   $('joinAnswerWrap').hidden = true;
   show('view-home');
-  setStatus('Tap Host on one phone, Join on the other.');
+  setStatus('Tap <b>Host</b> on one phone, <b>Join</b> on the other.');
 }
 $('btnHostBack').onclick = reset;
 $('btnJoinBack').onclick = reset;
 $('btnLeave').onclick = reset;
+
+/* ---------- PWA ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
 })();
 </script>
 </body>
